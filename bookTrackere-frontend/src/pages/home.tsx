@@ -159,12 +159,19 @@ export default function Home() {
                   key={book.id} 
                   className="bg-white/70 backdrop-blur-sm border-2 border-custom-pink-200 rounded-2xl shadow-lg hover:shadow-xl hover:border-custom-pink-300 transform hover:scale-[1.05] transition-all duration-300 overflow-hidden group cursor-pointer"
                 >
-                  <div className="aspect-[2/3] overflow-hidden bg-custom-pink-100">
+                  <div className="aspect-[2/3] overflow-hidden bg-custom-pink-100 relative">
                     {book.cover_url ? (
                       <img 
                         src={book.cover_url} 
                         alt={book.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        onError={(e) => {
+                          console.error("Image failed to load for:", book.title, "URL:", book.cover_url);
+                          const parent = e.currentTarget.parentElement;
+                          if (parent) {
+                            parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><span class="text-custom-pink-300 text-sm text-center px-2">No Cover</span></div>';
+                          }
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

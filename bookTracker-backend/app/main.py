@@ -2,9 +2,10 @@ from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, inspect, text
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import Optional, List
 from app import models
 from app.database import SessionLocal, engine
+from app.schemas import Book
 import requests
 
 
@@ -123,18 +124,20 @@ def seed_books_on_startup():
 
 
 #routes
-@app.get("/books")
+@app.get("/books", response_model=List[Book])
 def read_books(search: str = Query(None), db: Session = Depends(get_db)):
     if search:
-        return db.query(models.Book).filter(
+        books = db.query(models.Book).filter(
             or_(
                 models.Book.title.ilike(f"%{search}%"),
                 models.Book.author.ilike(f"%{search}%")
             )
         ).all()
-    return db.query(models.Book).all()
+    else:
+        books = db.query(models.Book).all()
+    return books
 
-@app.post("/books")
+@app.post("/books", response_model=Book)
 def create_book(title: str, author: str, db: Session = Depends(get_db)):
     # Fetch book cover from Google Books API
     cover_url = fetch_book_cover(title, author)
